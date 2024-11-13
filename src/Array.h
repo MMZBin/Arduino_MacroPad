@@ -28,8 +28,11 @@
 #include <Arduino.h>
 
 /*
-    WARNING: If you access an Array object with the subscript operator when the array is not set, the program will crash.
-             This is because the exception mechanism is not available in the Arduino environment.
+    !WARNING:
+        If you access an Array object with the subscript operator when the array is not set, the program will crash.
+        This is because the exception mechanism is not available in the Arduino environment.
+        Furthermore, in environments that do not support "assert" macro, it is dangerous because it causes out-of-bounds access to the array.
+        It is recommended to check the size using the getSize() method before accessing.
 */
 
 template<typename T>
@@ -48,7 +51,7 @@ public:
 
     T& operator[](const uint16_t index) {
         #ifdef assert
-            assert((size_ != 0) && (array_ != nullptr));
+            assert((size_ != 0) && (array_ != nullptr)); // Crash if array is nullptr or has no elements (if supported)
         #endif
 
         if (index >= size_) {
@@ -67,7 +70,7 @@ public:
             array_ = (T *)malloc(sizeof(T));
         } else {
             T* array = (T *)realloc(array_, size_ * sizeof(T));
-            if (array == NULL) { return 1; }
+            if (array == NULL) { return 1; } // Return 1 if reallocation fails.
             array_ = array;
         }
 
@@ -83,6 +86,7 @@ public:
 
         if (size_ == 0) { array_ = nullptr; }
 
+        // Bring an element to the forefront.
         for (uint16_t i = index; i < size_ - 1; i++) {
             array_[i] = array_[i + 1];
         }
@@ -90,8 +94,9 @@ public:
         size_--;
 
         if (size_ > 0) {
-            array_ = (T *)realloc(array_, size_ * sizeof(T));
-            if (array_ == NULL) { return 1; }
+            T* array = (T *)realloc(array_, size_ * sizeof(T));
+            if (array == NULL) { return 1; } // Return 1 if reallocation fails.
+            array_ = array;
         } else {
             free(array_);
             array_ = nullptr;
@@ -100,6 +105,7 @@ public:
         return 0;
     }
 
+    // Prohibits changes in the number of elements.
     void seal() { isSealed_ = true; }
 
     bool isSealed() { return isSealed_; }
@@ -110,6 +116,7 @@ public:
 
     uint16_t getSize() const { return size_; }
 
+    // Methods to enable the use of range-based for statements.
     T *begin() { return array_; }
     const T *begin() const { return array_; }
     T *end() { return array_ + size_; }

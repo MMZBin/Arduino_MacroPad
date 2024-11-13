@@ -33,14 +33,14 @@ public:
 
     //イベントの種類
     enum class Event : uint8_t {
-        SINGLE,       //短押し
-        LONG,         //長押し
-        DOUBLE,       //ダブルクリック
-        RISING_EDGE,  //立ち上がりエッジ
-        FALLING_EDGE, //立ち下がりエッジ
-        CHANGE_INPUT, //状態が変わったとき
-        PRESSING,     //押している間毎回
-        RELEASING     //離している間毎回
+        SINGLE,       //短押し            Short press
+        LONG,         //長押し            Long press
+        DOUBLE,       //ダブルクリック     Double click
+        RISING_EDGE,  //立ち上がりエッジ   Rising edge
+        FALLING_EDGE, //立ち下がりエッジ   Falling edge
+        CHANGE_INPUT, //状態が変わったとき When the input changes
+        PRESSED,      //押している間毎回   Every time the button is pressed
+        RELEASED      //離している間毎回   Every time the button is released
     };
 
     void static init(const uint32_t longThreshold=500, const uint32_t doubleThreshold=100, const uint32_t debounceTime=20) {
@@ -61,12 +61,12 @@ public:
     uint32_t getStateDuration() const;
     uint8_t getCountOfClick() const;
 
-    inline bool isPressing() const { return hasOccurred(Event::PRESSING); }
-    inline uint32_t getPressingTime() const { return (isPressing()) ? getStateDuration() : 0; }
+    inline bool isPressed() const { return hasOccurred(Event::PRESSED); }
+    inline uint32_t getPressTime() const { return (isPressed()) ? getStateDuration() : 0; }
 
 private:
     inline void onPress(const uint32_t now) {
-        emit(Event::PRESSING);
+        emit(Event::PRESSED);
 
         //立ち上がりエッジのときの処理
         if (!isPressBak_) { onRisingEdge(now); }
@@ -79,7 +79,7 @@ private:
     }
 
     inline void onRelease(const uint32_t now) {
-        emit(Event::RELEASING);
+        emit(Event::RELEASED);
 
         //立ち下がりエッジのときの処理
         if (isPressBak_) { onFallingEdge(now); }

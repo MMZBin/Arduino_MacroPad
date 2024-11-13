@@ -22,14 +22,15 @@
     SOFTWARE.
 */
 
-#ifndef MMZ_PB_ENHANCER
-#define MMZ_PB_ENHANCER
+#ifndef MMZ_KEY_H
+#define MMZ_KEY_H
 
+#include <functional>
 #include "Array.h"
 
 class Key {
 public:
-    using CallbackFunc = void (*)();
+    typedef std::function<void()> CallbackFunc;
 
     //イベントの種類
     enum class Event : uint8_t {

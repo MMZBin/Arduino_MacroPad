@@ -24,6 +24,22 @@ This library is written for the Raspberry Pi Pico, but it should work on all Ard
     - A macro to easily define anonymous functions without arguments or return values.
 
 ### Macro-Related
+- `Util.h`
+    - Provides features for use with specific HID libraries.
+    - Specify the library to be used before including this header.
+        - `Keyboard.h` = `USE_KEYBOARD_H`
+        - Example:
+        ```cpp
+            #define USE_KEYBOARD_H
+            #include "Util.h"
+        ```
+        - `pressToKey(key, pressKey)`
+            - For use with `Keyboard.h`
+            - Allows a key to input another key while being held, similar to a standard keyboard.
+            - Specify the target key (a `Key` object) as the first argument, and the desired input key as the second argument.
+            - Since it uses the `RISING_EDGE` and `FALLING_EDGE` events, you’ll need to configure it yourself if you want to add different processes.
+            - Example: `pressToKey(macroPad.KEYS[10], 'w');`
+
 - `macroDelay(ms, func)`
     - An alternative to the `delay()` function intended for use within macros.
     - It waits without blocking processing, then executes the callback function specified in the second argument after a certain time.

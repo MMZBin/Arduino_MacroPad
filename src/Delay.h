@@ -2,8 +2,9 @@
 #define MMZ_MACRO_DELAY_H
 
 #include <Arduino.h>
+#include <functional>
 
-using CallbackFunc = void (*)();
+typedef std::function<void()> CallbackFunc;
 
 class MacroDelay {
 public:

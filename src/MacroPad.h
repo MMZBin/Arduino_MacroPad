@@ -27,7 +27,6 @@
 
 #include <Arduino.h>
 
-#include "Array.h"
 #include "MatrixKeypad.h"
 #include "Key.h"
 #include "Delay.h"

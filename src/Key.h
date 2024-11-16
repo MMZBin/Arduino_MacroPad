@@ -26,7 +26,6 @@
 #define MMZ_KEY_H
 
 #include <functional>
-#include "Array.h"
 
 class Key {
 public:

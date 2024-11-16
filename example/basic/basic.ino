@@ -1,6 +1,6 @@
 #include <Keyboard.h> // HIDとして使用したい場合は、任意のHIDライブラリを使用します。
                       // If you want to use it as HID, use any HID library.
-#include "MacroPad.h"
+#include <MacroPad.h>
 
 #define USE_KEYBOARD_H // 使用するライブラリを選択(ユーティリティを使用する場合のみ必要)
                        // Select the library you want to use(Only required if you use the utility).

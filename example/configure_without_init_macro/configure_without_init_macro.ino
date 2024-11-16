@@ -1,5 +1,5 @@
 #include <Keyboard.h>
-#include "MacroPad.h"
+#include <MacroPad.h>
 
 uint8_t rowPins[] = { 0, 1, 2, 3 };
 uint8_t colPins[] = { 4, 5, 6, 7 };

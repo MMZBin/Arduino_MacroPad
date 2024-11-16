@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <functional>
+#include <vector>
 
 typedef std::function<void()> CallbackFunc;
 
@@ -10,7 +11,7 @@ class MacroDelay {
 public:
     // Callback function is called after specified time.
     static void delay(uint32_t ms, CallbackFunc func) {
-        callbacks_.add(LazyCallback(ms, func));
+        callbacks_.push_back(LazyCallback(ms, func));
     }
 
     static inline void invoke() {
@@ -20,13 +21,13 @@ public:
         if ((now - lastInvokedTime_) == 0) { return; }
         lastInvokedTime_ = now;
 
-        uint8_t size = callbacks_.getSize();
+        uint8_t size = callbacks_.size();
 
         for (uint8_t i = 0; i < size; i++) {
             if (callbacks_[i].executeTime > now) { continue; }
 
             callbacks_[i].func();
-            callbacks_.remove(i);
+            callbacks_.erase(callbacks_.begin() + i);
 
             //The 'i' and 'size' are set to -1 because the element is packed by one.
             if (i != 0) { i--; }
@@ -45,12 +46,12 @@ private:
         uint32_t executeTime; // Time to execute.
     };
 
-    static Array<LazyCallback> callbacks_;
+    static std::vector<LazyCallback> callbacks_;
     static uint32_t lastInvokedTime_;
 };
 
 
-Array<typename MacroDelay::LazyCallback> MacroDelay::callbacks_ = Array<typename MacroDelay::LazyCallback>();
+std::vector<typename MacroDelay::LazyCallback> MacroDelay::callbacks_;
 uint32_t MacroDelay::lastInvokedTime_ = 0;
 
 inline void macroDelay(uint32_t ms, CallbackFunc func) { MacroDelay::delay(ms, func); }

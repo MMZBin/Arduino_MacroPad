@@ -74,6 +74,7 @@ private:
         //長押し判定の時間を過ぎたら
         if ((!isHandled_) && (now - lastTransTime_ > longThreshold_)) {
             emit(Event::LONG);
+            isLongPressed_ = true;
             isHandled_ = true;
         }
     }
@@ -81,14 +82,17 @@ private:
     inline void onRelease(const uint32_t now) {
         emit(Event::RELEASED);
 
+        //時間を過ぎた&ダブルクリック待ち(再度押されなかったとき)
+        if ((countOfClick_ == 1) && (now - lastTransTime_ > doubleThreshold_)) {
+            if (!isLongPressed_) {
+                emit(Event::SINGLE);
+            }
+            countOfClick_ = 0;
+            isLongPressed_ = false;
+        }
+
         //立ち下がりエッジのときの処理
         if (isPressBak_) { onFallingEdge(now); }
-
-        //時間を過ぎた&ダブルクリック待ち(再度押されなかったとき)
-        if ((countOfClick_) && (now - lastTransTime_ > doubleThreshold_)) {
-            emit(Event::SINGLE);
-            countOfClick_ = 0;
-        }
 
         isHandled_ = false;
     }
@@ -132,7 +136,7 @@ private:
     uint32_t lastTransTime_;
     uint8_t countOfClick_;
 
-    bool isPressBak_, isHandled_;
+    bool isPressBak_, isHandled_, isLongPressed_;
 
     byte hasOccurred_; //0番目のビットが短押し,1番目のビットが長押し...のように対応している
 

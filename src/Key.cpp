@@ -28,7 +28,7 @@
 /* public */
 
 Key::Key()
- : lastTransTime_(0), countOfClick_(0), isPressBak_(false), isHandled_(false), hasOccurred_(0), callbacks_() {
+ : lastTransTime_(0), countOfClick_(0), isPressBak_(false), isHandled_(false), isLongPressed_(false), hasOccurred_(0), callbacks_() {
     //コールバック配列の初期化
     for (CallbackFunc& func : callbacks_) {
         func = nullptr;

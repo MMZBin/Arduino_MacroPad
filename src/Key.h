@@ -26,11 +26,13 @@
 #define MMZ_KEY_H
 
 #include <functional>
+#include <array>
+
+using CallbackFunc = std::function<void()>;
+using KeyAssign = std::array<CallbackFunc, 8>;
 
 class Key {
 public:
-    typedef std::function<void()> CallbackFunc;
-
     //イベントの種類
     enum class Event : uint8_t {
         SINGLE,       //短押し            Short press
@@ -53,8 +55,11 @@ public:
 
     void registerMacro(const Event type, const CallbackFunc callback);
     void removeMacro(const Event type);
+    void overrideMacros(const KeyAssign callbacks);
 
     void update(const bool isPressed);  //状態を更新する
+
+    void invoke() const;
 
     bool hasOccurred(const Event type) const;
 
@@ -63,6 +68,9 @@ public:
 
     inline bool isPressed() const { return hasOccurred(Event::PRESSED); }
     inline uint32_t getPressTime() const { return (isPressed()) ? getStateDuration() : 0; }
+
+    bool isPressBak_, isHandled_, isLongPressed_;
+    uint8_t countOfClick_;
 
 private:
     inline void onPress(const uint32_t now) {
@@ -74,8 +82,8 @@ private:
         //長押し判定の時間を過ぎたら
         if ((!isHandled_) && (now - lastTransTime_ > longThreshold_)) {
             emit(Event::LONG);
-            isLongPressed_ = true;
             isHandled_ = true;
+            isLongPressed_ = true;
         }
     }
 
@@ -83,12 +91,11 @@ private:
         emit(Event::RELEASED);
 
         //時間を過ぎた&ダブルクリック待ち(再度押されなかったとき)
-        if ((countOfClick_ == 1) && (now - lastTransTime_ > doubleThreshold_)) {
-            if (!isLongPressed_) {
+        if (now - lastTransTime_ > doubleThreshold_) {
+            if (((countOfClick_ == 1)) && (!isLongPressed_)) {
                 emit(Event::SINGLE);
             }
             countOfClick_ = 0;
-            isLongPressed_ = false;
         }
 
         //立ち下がりエッジのときの処理
@@ -117,30 +124,19 @@ private:
         emit(Event::CHANGE_INPUT);
 
         lastTransTime_ = now; //離し始めた時間を記録
+        isLongPressed_ = false;
     }
 
     inline void emit(const Event type) { hasOccurred_ |= (1 << static_cast<uint8_t>(type)); }
-
-    inline void invoke() const {
-        for (uint8_t i = 0; i < NUM_OF_EVENTS; i++) {
-            if ((hasOccurred(static_cast<Event>(i))) && (callbacks_[i] != nullptr)) {
-                callbacks_[i]();
-            }
-        }
-    }
-
 
     static uint32_t longThreshold_, doubleThreshold_, debounceTime_;
     static constexpr uint8_t NUM_OF_EVENTS = 8;
 
     uint32_t lastTransTime_;
-    uint8_t countOfClick_;
-
-    bool isPressBak_, isHandled_, isLongPressed_;
 
     byte hasOccurred_; //0番目のビットが短押し,1番目のビットが長押し...のように対応している
 
-    CallbackFunc callbacks_[NUM_OF_EVENTS];
+    KeyAssign callbacks_;
 };
 
 #endif
